@@ -1,0 +1,92 @@
+---
+title: "Ejercicio 2"
+author:
+  - "Marcos Oliva"
+  - "Hugo García"
+date: 11/10/2023
+format: html
+embed-resources: true
+lang: ES
+---
+
+```{r Setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE)
+library(tidyverse, warn.conflicts = FALSE)
+library(plot3D)
+library(plotly)
+library(mvnormtest)
+```
+
+Sea $\mathbf{X}_1,\ldots,\mathbf{X}_{80}$ una muestra de una población [normal multivariante]{.underline} con media $\mathbf{\mu}$ y matriz de covarianzas $\mathbf{\Sigma}$.
+
+(a) ¿Cuál es la distribución aproximada de $$\mathbf{\overline{X}}=\sum_{i=1}^{80}\frac{X_i}{80}\text{ ?}$$
+(b) Tómense $N=200$ muestras de tamaño $n=80$ de un vector $\mathbf{X}=(X_1,X_2)^T$ con distribución uniforme en el cuadrado $[0,1]\times[0,1]$. Calcúlense las medias $\mathbf{\overline{x}}_1,\ldots,\mathbf{\overline{x}}_{80}$ de estas muestras y dibújese el histograma correspondiente a las medias, comprobando si se asemeja a una densidad normal.
+
+## Apartado (a)
+
+Como la muestra proviene de una población normal multivariante, entonces tenemos que las variables aleatorias $\mathbf{X}_i$ siguen una distribución normal univariante de media $\mu_i$ y desviación típica $\sigma_{ii}$ (es decir, $\mathbf{X}_i\sim \mathcal{N}(\mu_i,\sigma_{ii}^2)$) y son independientes dos a dos. Ahora, podemos utilizar la siguiente proposición, que se da en Estadística:
+
+*Sean* $X_1,\ldots,X_n$ *variables aleatorias independientes con leyes respectivas* $\mathcal{N}(\mu_1,\sigma_1^2),\ldots,\mathcal{N}(\mu_n,\sigma_n^2)$. *Entonces la variable aleatoria* $Y = a_1X_1+\cdots+a_nX_n$ *sigue una ley* $$\mathcal{N}=\left(\sum_{i=1}^na_i\mu_i,\sum_{i=1}^na_i^2\sigma_i^2\right)$$
+
+Si escogemos $a_i=\frac{1}{80}$, obtenemos la variable aleatoria $\mathbf{\overline{X}}$ y, aplicando la proposición anterior, tenemos que $$\mathbf{\overline{X}}=\sum_{i=1}^{80}\frac{X_i}{80}\sim\sum_{i=1}^{80}\frac{\mathcal{N}(\mu_i,\sigma_{ii}^2)}{80}\sim\mathcal{N}\left(\sum_{i=1}^{80}\frac{\mu_i}{80},\sum_{i=1}^{80}\frac{\sigma_{ii}^2}{80^2}\right)=\mathcal{N}\left(\frac{1}{80}\sum_{i=1}^{80}\mu_i,\frac{1}{80^2}\sum_{i=1}^{80}\sigma_{ii}^2\right)$$
+
+Finalmente, tenemos que $\mathbf{\overline{X}}\sim\mathcal{N}\left(\frac{1}{80}\sum\mathbf{\mu},\frac{1}{80^2}\sum\mathbf{\sigma^2}\right)$, donde $\mathbf{\sigma^2}=diag(\mathbf{\Sigma})$.
+
+## Apartado (b)
+
+En primer lugar, usando el apartado anterior y sabiendo que una distribución uniforme $\mathcal{U}(0,1)$ tiene una media $\mu=\frac{1}{2}$ y varianza $\sigma=\frac{1}{12}$, tenemos que $\mathbf{\overline{X}}\sim\mathcal{N}\left(\frac{1}{80}\sum\mathbf{\mu},\frac{1}{80^2}\sum\mathbf{\sigma^2}\right)=\mathcal{N}\left(\frac{1}{2},\frac{1}{960}\right)$. Ahora, como estamos trabajando con un vector $\mathbf{X}=(X_1,X_2)^T$ donde $X_1,X_2\sim\mathcal{U}(0,1)$ y son independientes, entonces obtenemos que la media sigue la siguiente distribución: $\mathbf{\overline{x}}_i\sim
+\mathcal{N}\left(\left(\frac{1}{2},\frac{1}{2}\right),\left(\begin{smallmatrix}
+\frac{1}{960} & 0 \\ 0 & \frac{1}{960} \end{smallmatrix}\right) \right)$
+
+Primero de todo, vamos a generar las medias de las muestras bajo una semilla fijada para poder reproducir los resultados. Además, vamos a dividir el espacio donde habitan nuestros datos en una malla de $35\times35$ intervalos de la misma longitud.
+
+```{r Datos, echo = TRUE}
+set.seed(2023)
+df = data.frame(x=c(), y=c()) %>% as_tibble()
+for (i in 1:200) {
+  vec = data.frame("x"=runif(80),"y"=runif(80))
+  df = rbind(df, c(mean(vec$x), mean(vec$y)))
+}
+df_original <- df %>% rename(.,x=1,y=2)
+df <- df %>% rename(.,x=1,y=2) %>% mutate(., x=cut(x,35)) %>% mutate(., y=cut(y,35))
+```
+
+Ahora, veamos como están distribuidos los datos usando varios gráficos. Empecemos con una vista superior:
+
+```{r Gráfico 1}
+grafico1 <- ggplot(data = df, aes(x,y)) + geom_bin2d(binwidth= c(0.25,500)) +
+scale_fill_gradient2(low = "#0088ff", high = "#ff0000", mid = "#ffff00", midpoint = 2) + 
+  theme_classic() + theme(axis.text.x = element_text(angle = 90)); grafico1
+```
+
+Veamos un histograma en 3D:
+
+```{r Gráfico 2}
+z = table(df)
+hist3D(z=z, border="black")
+```
+
+Ahora, veamos un gráfico interactivo:
+
+```{r Gráfico 3}
+x = colnames(z)
+y = rownames(z)
+grid <- list(
+  gridcolor='rgb(255, 255, 255)',
+  zerolinecolor='rgb(255, 255, 255)',
+  showbackground=TRUE,
+  backgroundcolor='rgb(230, 230,230)'
+)
+grafico3 <- plot_ly(x = x, y = y, z = z, type = "mesh3d") %>% add_surface(showscale=FALSE) %>% 
+  layout(title = "Histograma", scene = list(xaxis=grid,yaxis=grid,zaxis=grid)); grafico3
+```
+
+Para ver que, efectivamente, tenemos la distribución predicha al inicio del apartado, vamos a hacer un test de normalidad y luego calcularemos el vector de medias y la matriz de covarianza:
+
+```{r Normalidad, echo = TRUE}
+df_original %>% t() %>% mshapiro.test()
+c(mean(df_original[,1]), mean(df_original[,2]))
+cov(df_original)
+```
+
+Podemos ver que no solo tenemos un gran p-valor, sino que además el vector de medias y la matriz de covarianza se ajustan bastante bien a la estimación.
