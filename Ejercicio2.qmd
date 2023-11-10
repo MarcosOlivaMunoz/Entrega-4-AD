@@ -26,7 +26,7 @@ Sea $\mathbf{X}_1,\ldots,\mathbf{X}_{80}$ una muestra de una población [normal 
 
 Como la muestra proviene de una población normal multivariante, entonces tenemos que las variables aleatorias $\mathbf{X}_i$ siguen una distribución normal univariante de media $\mu_i$ y desviación típica $\sigma_{ii}$ (es decir, $\mathbf{X}_i\sim \mathcal{N}(\mu_i,\sigma_{ii}^2)$) y son independientes dos a dos. Ahora, podemos utilizar la siguiente proposición, que se da en Estadística:
 
-*Sean* $X_1,\ldots,X_n$ *variables aleatorias independientes con leyes respectivas* $\mathcal{N}(\mu_1,\sigma_1^2),\ldots,\mathcal{N}(\mu_n,\sigma_n^2)$. *Entonces la variable aleatoria* $Y = a_1X_1+\cdots+a_nX_n$ *sigue una ley* $$\mathcal{N}=\left(\sum_{i=1}^na_i\mu_i,\sum_{i=1}^na_i^2\sigma_i^2\right)$$
+*Sean* $X_1,\ldots,X_n$ *variables aleatorias independientes con leyes respectivas* $\mathcal{N}(\mu_1,\sigma_1^2),\ldots,\mathcal{N}(\mu_n,\sigma_n^2)$. *Entonces la variable aleatoria* $Y = a_1X_1+\cdots+a_nX_n$ *sigue una ley* $$\mathcal{N}\left(\sum_{i=1}^na_i\mu_i,\sum_{i=1}^na_i^2\sigma_i^2\right)$$
 
 Si escogemos $a_i=\frac{1}{80}$, obtenemos la variable aleatoria $\mathbf{\overline{X}}$ y, aplicando la proposición anterior, tenemos que $$\mathbf{\overline{X}}=\sum_{i=1}^{80}\frac{X_i}{80}\sim\sum_{i=1}^{80}\frac{\mathcal{N}(\mu_i,\sigma_{ii}^2)}{80}\sim\mathcal{N}\left(\sum_{i=1}^{80}\frac{\mu_i}{80},\sum_{i=1}^{80}\frac{\sigma_{ii}^2}{80^2}\right)=\mathcal{N}\left(\frac{1}{80}\sum_{i=1}^{80}\mu_i,\frac{1}{80^2}\sum_{i=1}^{80}\sigma_{ii}^2\right)$$
 
